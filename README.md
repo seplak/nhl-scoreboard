@@ -21,7 +21,7 @@ and run with: `./nhl-scoreboard`.
 Most of the functionality I want still needs to be built. In no particular order of importance:
 
 - Handle in-progress games; time left in game and score
-- Change the date, moving 1 day at a time is sufficient
+- Don't show times for games in the past, just scores
 - Standings page
 - Refresh functionality (for in-progress games)
 - Statistics for:

@@ -189,11 +189,5 @@ func (g *Game) AwayTeamName() string {
 
 // Get the local time of a game
 func (g *Game) GetGameDate() string {
-	// TODO: Date formatting could/should come from a config
 	return g.GameDate.Local().Format("15:04:05")
 }
-
-
-// func (g Game) HomeTeamAbbr() string {
-// 	return g.Teams.Home.Team.
-// }

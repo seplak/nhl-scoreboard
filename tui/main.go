@@ -13,15 +13,18 @@ import (
 type MainModel struct {
 	Games  []data.Game // The games for the selected day
 	Table  table.Model
+	Date   time.Time
 }
 
 func InitialModel() MainModel {
+	// past := time.Date(2022, time.March, 15, 5, 0, 0, 0, time.UTC) // Past date with games and scores
+	// future := time.Date(2022, time.October, 8, 5, 0, 0, 0, time.UTC) // Future date with games and scores
 	model := MainModel{
-		// On init, load today's games
-		Games:  data.FetchGames(utils.FormatDate(time.Now())),
-		// Games:  data.FetchGames("2022-10-08"), // -- Future date with games and no scores
-		// Games:  data.FetchGames("2022-03-13"), // -- Old date with games and scores
+		Date: time.Now(),
+		// Date:  past, // -- Past date with games and scores
+		// Date:  future, // -- Future date with games and no scores
 	}
+	model.Games = data.FetchGames(utils.FormatDate(model.Date))
 	model.Table = model.Table.NewModel(model.Games)
 
 	return model
@@ -37,6 +40,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		case "n":
+			m.Date = m.Date.AddDate(0, 0, 1)
+			m.refreshTable()
+			return m, nil
+		case "p":
+			m.Date = m.Date.AddDate(0, 0, -1)
+			m.refreshTable()
+			return m, nil
+
 		}
 	}
 	return m, nil
@@ -45,10 +57,17 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m MainModel) View() string {
 	var ui string
 
+	ui = "Schedule for: " + utils.PrintDate(m.Date) + "\n\n"
+
 	ui += m.Table.View()
 
 	// TODO: Implement a help section
-	ui += "\nPress q to quit.\n"
+	ui += "\nPress q to quit, n for next day, p for previous day.\n"
 
 	return ui
+}
+
+func (m *MainModel) refreshTable() {
+	m.Games = data.FetchGames(utils.FormatDate(m.Date))
+	m.Table = m.Table.NewModel(m.Games)
 }
