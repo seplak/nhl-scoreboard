@@ -38,17 +38,23 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		// Exit the program
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		// Next day
 		case "n":
 			m.Date = m.Date.AddDate(0, 0, 1)
 			m.refreshTable()
 			return m, nil
+		// Previous day
 		case "p":
 			m.Date = m.Date.AddDate(0, 0, -1)
 			m.refreshTable()
 			return m, nil
-
+		// Refresh the data
+		case "r":
+			m.refreshTable()
+			return m, nil
 		}
 	}
 	return m, nil
@@ -62,7 +68,7 @@ func (m MainModel) View() string {
 	ui += m.Table.View()
 
 	// TODO: Implement a help section
-	ui += "\nPress q to quit, n for next day, p for previous day.\n"
+	ui += "\nPress n for next day, p for previous day,\nr to refresh, q to quit."
 
 	return ui
 }

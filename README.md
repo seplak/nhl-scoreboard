@@ -23,7 +23,6 @@ Most of the functionality I want still needs to be built. In no particular order
 - Handle in-progress games; time left in game and score
 - Don't show times for games in the past, just scores
 - Standings page
-- Refresh functionality (for in-progress games)
 - Statistics for:
   - In progress games (shots, scoring, etc.)
   - Finished games (shots, scoring, three stars, link to highlights)
