@@ -2,30 +2,34 @@ package tui
 
 import (
 	"time"
+	"strings"
 
 	"github.com/seplak/nhl-scoreboard/data"
 	"github.com/seplak/nhl-scoreboard/utils"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/seplak/nhl-scoreboard/tui/components/table"
+	"github.com/seplak/nhl-scoreboard/tui/table"
+	"github.com/seplak/nhl-scoreboard/tui/help"
 
 )
 
 type MainModel struct {
-	Games  []data.Game // The games for the selected day
-	Table  table.Model
-	Date   time.Time
+	games  []data.Game // The games for the selected day
+	table  table.Model
+	date   time.Time
+	help   help.Model
 }
 
 func InitialModel() MainModel {
 	// past := time.Date(2022, time.March, 15, 5, 0, 0, 0, time.UTC) // Past date with games and scores
 	// future := time.Date(2022, time.October, 8, 5, 0, 0, 0, time.UTC) // Future date with games and scores
 	model := MainModel{
-		Date: time.Now(),
+		date: time.Now(),
 		// Date:  past, // -- Past date with games and scores
 		// Date:  future, // -- Future date with games and no scores
+		help: help.NewModel(),
 	}
-	model.Games = data.FetchGames(utils.FormatDate(model.Date))
-	model.Table = model.Table.NewModel(model.Games)
+	model.games = data.FetchGames(utils.FormatDate(model.date))
+	model.table = model.table.NewModel(model.games)
 
 	return model
 }
@@ -35,6 +39,8 @@ func (m MainModel) Init() tea.Cmd {
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var helpCmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -43,12 +49,12 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		// Next day
 		case "n":
-			m.Date = m.Date.AddDate(0, 0, 1)
+			m.date = m.date.AddDate(0, 0, 1)
 			m.refreshTable()
 			return m, nil
 		// Previous day
 		case "p":
-			m.Date = m.Date.AddDate(0, 0, -1)
+			m.date = m.date.AddDate(0, 0, -1)
 			m.refreshTable()
 			return m, nil
 		// Refresh the data
@@ -57,23 +63,26 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 	}
-	return m, nil
+
+
+	m.help, helpCmd = m.help.Update(msg)
+
+	return m, tea.Batch(helpCmd)
 }
 
 func (m MainModel) View() string {
-	var ui string
+	ui := strings.Builder{}
 
-	ui = "Schedule for: " + utils.PrintDate(m.Date) + "\n\n"
+	ui.WriteString("Schedule for: " + utils.PrintDate(m.date) + "\n\n")
 
-	ui += m.Table.View()
+	ui.WriteString(m.table.View())
+	ui.WriteString("\n")
+	ui.WriteString(m.help.View())
 
-	// TODO: Implement a help section
-	ui += "\nPress n for next day, p for previous day,\nr to refresh, q to quit."
-
-	return ui
+	return ui.String()
 }
 
 func (m *MainModel) refreshTable() {
-	m.Games = data.FetchGames(utils.FormatDate(m.Date))
-	m.Table = m.Table.NewModel(m.Games)
+	m.games = data.FetchGames(utils.FormatDate(m.date))
+	m.table = m.table.NewModel(m.games)
 }
