@@ -9,11 +9,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-const (
-	columnKeyMatchup = "matchup"
-	columnKeyTime    = "time"
-)
-
 type Model struct {
 	table table.Model
 	games []data.Game
