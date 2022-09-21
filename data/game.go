@@ -1,19 +1,12 @@
 package data
 
 import (
-	// "fmt"
-	"net/http"
-	"time"
-	"io"
 	"encoding/json"
+	"time"
 
+	"github.com/seplak/nhl-scoreboard/utils"
 	log "github.com/sirupsen/logrus"
 )
-
-// const (
-// 	baseEndpoint     = "https://statsapi.web.nhl.com/api/v1/"
-// 	scheduleEndpoint = baseEndpoint + "schedule?date=2022-10-08"
-// )
 
 type FullSchedule struct {
 	Copyright    string `json:"copyright"`
@@ -140,19 +133,10 @@ type Game struct {
 }
 
 func fetchSchedule(date string) FullSchedule {
-	resp, err := http.Get("https://statsapi.web.nhl.com/api/v1/schedule?date=" + date)
-	if err != nil {
-		log.Error("Could not get NHL game schedule.")
-	}
-
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Could not read the schedule response body.")
-	}
+	data := utils.MakeRequest("https://statsapi.web.nhl.com/api/v1/schedule?date=" + date)
 
 	var fullSchedule FullSchedule
-	if err := json.Unmarshal(body, &fullSchedule); err != nil {
+	if err := json.Unmarshal(data, &fullSchedule); err != nil {
 		log.Error("Could not unmarshal schedule JSON")
 	}
 
@@ -187,7 +171,34 @@ func (g *Game) AwayTeamName() string {
 	return g.Teams.Away.Team.Name
 }
 
+// Get the abbreviated name of the home team of a game
+func (g *Game) HomeTeamAbbr() string {
+	team := fetchTeam(g.Teams.Home.Team.ID)
+	return team.TeamAbbreviation()
+}
+
+// Get the abbreviated name of the away team of a game
+func (g *Game) AwayTeamAbbr() string {
+	team := fetchTeam(g.Teams.Away.Team.ID)
+	return team.TeamAbbreviation()
+}
+
+// Get the score of the away team of a game
+func (g *Game) AwayTeamScore() int {
+	return g.Teams.Away.Score
+}
+
+// Get the score of the home team of a game
+func (g *Game) HomeTeamScore() int {
+	return g.Teams.Home.Score
+}
+
 // Get the local time of a game
 func (g *Game) GetGameDate() string {
 	return g.GameDate.Local().Format("15:04:05")
+}
+
+// Whether or not a game is complete
+func (g *Game) IsComplete() bool {
+	return g.Status.AbstractGameState == "Final"
 }

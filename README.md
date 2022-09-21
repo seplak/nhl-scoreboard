@@ -27,3 +27,4 @@ Most of the functionality I want still needs to be built. In no particular order
   - In progress games (shots, scoring, etc.)
   - Finished games (shots, scoring, three stars, link to highlights)
 - Better styling across the board
+- Bold the team abbreviation and score of the winning team in final games
