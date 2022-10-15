@@ -40,6 +40,12 @@ func generateColumnsFromData(games []data.Game) []table.Column {
 			{Title: "Matchup", Width: 50},
 			{Title: "Score", Width: 20},
 		}
+	} else if gamesHaveStarted(games) {
+		return []table.Column{
+			{Title: "Matchup", Width: 50},
+			{Title: "Score", Width: 20},
+			{Title: "Status", Width: 20},
+		}
 	} else {
 		return []table.Column{
 			{Title: "Matchup", Width: 50},
@@ -69,18 +75,43 @@ func generateRowsFromData(games []data.Game) []table.Row {
 	if allComplete(games) {
 		for _, game := range games {
 			row := table.Row{
-				fmt.Sprintf("%s @ %s", game.AwayTeamName(), game.HomeTeamName()),
-				fmt.Sprintf("%s %d - %s %d", game.AwayTeamAbbr(), game.AwayTeamScore(), game.HomeTeamAbbr(), game.HomeTeamScore()),
+				renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
+				renderScore(game.AwayTeamAbbr(), game.HomeTeamAbbr(), game.AwayTeamScore(), game.HomeTeamScore()),
 			}
 			rows = append(rows, row)
+		}
+	} else if gamesHaveStarted(games) {
+		for _, game := range games {
+			var row table.Row
+			if game.IsComplete() {
+				row = table.Row{
+					renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
+					renderScore(game.AwayTeamAbbr(), game.HomeTeamAbbr(), game.AwayTeamScore(), game.HomeTeamScore()),
+					fmt.Sprintln("F"),
+				}
+			} else if game.HasStarted() {
+				stats := game.GetLinecore()
+				row = table.Row{
+					renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
+					renderScore(game.AwayTeamAbbr(), game.HomeTeamAbbr(), game.AwayTeamScore(), game.HomeTeamScore()),
+					fmt.Sprintf("%s %s", stats.GetPeriodTimeLeft(), stats.GetPeriod()),
+				}
+			} else {
+				row = table.Row{
+					renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
+					fmt.Sprintln("-"),
+					game.GetGameDate(),
+				}
+			}
+			rows = append(rows, row)
+
 		}
 	} else {
 		for _, game := range games {
 			row := table.Row{
-				fmt.Sprintf("%s @ %s", game.AwayTeamName(), game.HomeTeamName()),
+				renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
 				game.GetGameDate(),
 			}
-
 			rows = append(rows, row)
 		}
 	}
@@ -88,11 +119,32 @@ func generateRowsFromData(games []data.Game) []table.Row {
 	return rows
 }
 
+func renderMatchup(away, home string) string {
+	return fmt.Sprintf("%s @ %s", away, home)
+}
+
+func renderScore(away, home string, awayScore, homeScore int) string {
+	return fmt.Sprintf("%s %d - %s %d", away, awayScore, home, homeScore)
+}
+
+// If any of the games have started
+func gamesHaveStarted(games []data.Game) bool {
+	started := false
+	for !started {
+		for _, game := range games {
+			started = started || game.HasStarted()
+		}
+	}
+	return started
+}
+
 // Whether or not all of the games are complete
 func allComplete(games []data.Game) bool {
 	allComplete := true
-	for _, game := range games {
-		allComplete = allComplete && game.IsComplete()
+	for allComplete {
+		for _, game := range games {
+			allComplete = allComplete && game.IsComplete()
+		}
 	}
 	return allComplete
 }
