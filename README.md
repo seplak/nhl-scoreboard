@@ -4,7 +4,7 @@ I like hockey, but don't like browsing sports websites.
 
 This is a small TUI app built with [bubbletea](https://github.com/charmbracelet/bubbletea) that displays NHL scores in your terminal.
 
-![](https://github.com/seplak/nhl-scoreboard/demo.gif)
+![](demo.gif)
 
 ## Requirements
 
