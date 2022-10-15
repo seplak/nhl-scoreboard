@@ -2,9 +2,11 @@
 
 I like hockey, but don't like browsing sports websites.
 
-This is a work in progress TUI app built with [bubbletea](https://github.com/charmbracelet/bubbletea) that aims to provide meaningful information about upcoming, in-progress, and completed games.
+This is a small TUI app built with [bubbletea](https://github.com/charmbracelet/bubbletea) that displays NHL scores in your terminal.
 
-## Installation
+![](https://github.com/seplak/nhl-scoreboard/demo.gif)
+
+## Requirements
 
 You need a working installation of Go. You can install it [here](https://go.dev/doc/install)
 
@@ -20,7 +22,6 @@ and run with: `./nhl-scoreboard`.
 
 Most of the functionality I want still needs to be built. In no particular order of importance:
 
-- Handle in-progress games; time left in game and score
 - Don't show times for games in the past, just scores
 - Standings page
 - Statistics for:
