@@ -35,12 +35,7 @@ func generateColumnsFromData(games []data.Game) []table.Column {
 		return []table.Column{}
 	}
 
-	if allComplete(games) {
-		return []table.Column{
-			{Title: "Matchup", Width: 50},
-			{Title: "Score", Width: 20},
-		}
-	} else if gamesHaveStarted(games) {
+	if gamesHaveStarted(games) {
 		return []table.Column{
 			{Title: "Matchup", Width: 50},
 			{Title: "Score", Width: 20},
@@ -72,15 +67,7 @@ func generateRowsFromData(games []data.Game) []table.Row {
 		return []table.Row{}
 	}
 
-	if allComplete(games) {
-		for _, game := range games {
-			row := table.Row{
-				renderMatchup(game.AwayTeamName(), game.HomeTeamName()),
-				renderScore(game.AwayTeamAbbr(), game.HomeTeamAbbr(), game.AwayTeamScore(), game.HomeTeamScore()),
-			}
-			rows = append(rows, row)
-		}
-	} else if gamesHaveStarted(games) {
+	if gamesHaveStarted(games) {
 		for _, game := range games {
 			var row table.Row
 			if game.IsComplete() {
@@ -130,21 +117,8 @@ func renderScore(away, home string, awayScore, homeScore int) string {
 // If any of the games have started
 func gamesHaveStarted(games []data.Game) bool {
 	started := false
-	for !started {
-		for _, game := range games {
-			started = started || game.HasStarted()
-		}
+	for _, game := range games {
+		started = started || game.HasStarted()
 	}
 	return started
-}
-
-// Whether or not all of the games are complete
-func allComplete(games []data.Game) bool {
-	allComplete := true
-	for allComplete {
-		for _, game := range games {
-			allComplete = allComplete && game.IsComplete()
-		}
-	}
-	return allComplete
 }
