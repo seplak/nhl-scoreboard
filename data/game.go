@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"time"
+	"fmt"
 
 	"github.com/seplak/nhl-scoreboard/utils"
 	log "github.com/sirupsen/logrus"
@@ -201,4 +202,21 @@ func (g *Game) GetGameDate() string {
 // Whether or not a game is complete
 func (g *Game) IsComplete() bool {
 	return g.Status.AbstractGameState == "Final"
+}
+
+// Whether or not a game has started. A game has started
+// if it is in progress or complete.
+func (g *Game) HasStarted() bool {
+	return g.IsComplete() || g.Status.AbstractGameState == "Live"
+}
+
+func (g *Game) GetLinecore() Linescore {
+	url := fmt.Sprintf("https://statsapi.web.nhl.com/api/v1/game/%d/linescore", g.GamePk)
+	data := utils.MakeRequest(url)
+
+	var linescore Linescore
+	if err := json.Unmarshal(data, &linescore); err != nil {
+		log.Error("Could not unmarshal schedule JSON")
+	}
+	return linescore
 }
